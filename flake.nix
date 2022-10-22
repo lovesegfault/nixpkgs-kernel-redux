@@ -4,28 +4,50 @@
       url = "github:edolstra/flake-compat";
       flake = false;
     };
-    nixpkgs.url = "github:NixOS/nixpkgs";
-    pre-commit-hooks = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+    pre-commit = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "utils";
+      inputs.flake-utils.follows = "flake-utils";
     };
-    utils.url = "github:numtide/flake-utils";
+    flake-utils.url = "github:numtide/flake-utils";
   };
-  outputs = { self, nixpkgs, utils, ... }@inputs: {
-    overlay = import ./overlay.nix;
-  } // utils.lib.eachDefaultSystem (system: {
-    checks = import ./checks.nix inputs system;
-
-    devShell = import ./dev-shell.nix inputs system;
-
-    nixpkgs = import nixpkgs {
-      inherit system;
-      overlays = [ self.overlay ];
+  outputs = { self, nixpkgs, flake-utils, pre-commit, ... }: {
+    overlays.default = final: _: {
+      configureLinuxKernel = final.callPackage ./configure-linux-kernel.nix { };
     };
+  } // flake-utils.lib.eachDefaultSystem (system:
+    let
+      pkgs = import nixpkgs { inherit system; overlays = [ self.overlays.default ]; };
+    in
+    {
+      checks.pre-commit = pre-commit.lib.${system}.run {
+        src = ./.;
+        hooks = {
+          nixpkgs-fmt.enable = true;
+          statix.enable = true;
+        };
+      };
 
-    packages = {
-      inherit (self.nixpkgs.${system}) testConfig;
-    };
-  });
+      devShells.default = pkgs.mkShell {
+        name = "nixpkgs-kernel-redux";
+        nativeBuildInputs = with pkgs; [
+          cachix
+          nix-build-uncached
+          nix-linter
+          nixpkgs-fmt
+          rnix-lsp
+          statix
+        ];
+        shellHook = ''
+          ${self.checks.${system}.pre-commit.shellHook}
+        '';
+      };
+
+      packages = {
+        linuxKernelRedux_6_0 = pkgs.configureLinuxKernel {
+          inherit (pkgs.linuxKernel.kernels.linux_6_0) patches pname version src makeFlags;
+        };
+      };
+    });
 }
