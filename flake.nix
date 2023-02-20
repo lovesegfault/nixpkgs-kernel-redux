@@ -24,12 +24,18 @@
     {
       checks.pre-commit = pre-commit.lib.${system}.run {
         src = ./.;
+        settings = {
+          statix.ignore = [ "kconfig/config.nix" ];
+        };
         hooks = {
           black.enable = true;
           isort.enable = true;
           ruff.enable = true;
 
-          nixpkgs-fmt.enable = true;
+          nixpkgs-fmt = {
+            enable = true;
+            excludes = [ "kconfig/config.nix" ];
+          };
           statix.enable = true;
         };
       };
