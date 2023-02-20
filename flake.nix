@@ -4,7 +4,7 @@
       url = "github:edolstra/flake-compat";
       flake = false;
     };
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     pre-commit = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.flake-compat.follows = "flake-compat";
@@ -25,6 +25,10 @@
       checks.pre-commit = pre-commit.lib.${system}.run {
         src = ./.;
         hooks = {
+          black.enable = true;
+          isort.enable = true;
+          ruff.enable = true;
+
           nixpkgs-fmt.enable = true;
           statix.enable = true;
         };
@@ -35,10 +39,13 @@
         nativeBuildInputs = with pkgs; [
           cachix
           nix-build-uncached
-          nix-linter
           nixpkgs-fmt
           rnix-lsp
           statix
+
+          (python3.withPackages (p: with p; [ black mypy isort ]))
+          pyright
+          ruff
         ];
         shellHook = ''
           ${self.checks.${system}.pre-commit.shellHook}
