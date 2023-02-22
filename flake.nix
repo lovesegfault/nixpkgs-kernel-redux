@@ -15,7 +15,9 @@
   };
   outputs = { self, nixpkgs, flake-utils, pre-commit, ... }: {
     overlays.default = final: _: {
-      configureLinuxKernel = final.callPackage ./configure-linux-kernel.nix { };
+      autokernel = final.callPackage ./kconfig/autokernel.nix { };
+      configureLinuxKernel = final.callPackage ./kconfig/default.nix { };
+
     };
   } // flake-utils.lib.eachDefaultSystem (system:
     let
@@ -67,9 +69,7 @@
       };
 
       packages = {
-        linuxKernelRedux_6_0 = pkgs.configureLinuxKernel {
-          inherit (pkgs.linuxKernel.kernels.linux_6_0) patches pname version src makeFlags;
-        };
+        inherit (pkgs) autokernel;
       };
     });
 }
