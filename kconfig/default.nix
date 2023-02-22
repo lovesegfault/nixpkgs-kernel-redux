@@ -16,8 +16,7 @@
 , src
 , patches ? [ ]
 , makeFlags ? [ ]
-  # , baseConfig ? stdenv.hostPlatform.linux-kernel.baseConfig
-, baseConfig ? "allmodconfig"
+, baseConfig ? stdenv.hostPlatform.linux-kernel.baseConfig
 , extraConfig ? { }
 }:
 assert (lib.versionAtLeast version "4.16") -> (bison != null && flex != null);
@@ -75,6 +74,7 @@ stdenv.mkDerivation {
   doInstallCheck = true;
 
   installCheckPhase = ''
+    runHook preInstallCheck
     declare -A knownOptions
 
     configuredOptions="${placeholder "out"}"
@@ -107,6 +107,7 @@ stdenv.mkDerivation {
     done < "$providedOptions"
 
     # [[ $rc == 0 ]] || exit $rc
+    runHook postInstallCheck
   '';
 
   dontFixup = true;

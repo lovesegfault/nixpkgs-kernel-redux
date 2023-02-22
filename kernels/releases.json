@@ -1,0 +1,71 @@
+{
+  "latest_stable": {
+    "version": "6.2"
+  },
+  "releases": [
+    {
+      "iseol": false,
+      "version": "6.2",
+      "moniker": "mainline",
+      "source": "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.2.tar.xz",
+      "changelog": null,
+      "hash": "sha256-dIYvqKtA7a6FuzOFwLcf4QMoi85RhSbWMZeACzy97LE="
+    },
+    {
+      "iseol": false,
+      "version": "6.1.13",
+      "moniker": "stable",
+      "source": "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.1.13.tar.xz",
+      "changelog": "https://cdn.kernel.org/pub/linux/kernel/v6.x/ChangeLog-6.1.13",
+      "hash": "sha256-SIQTGfSwB32hXkF25iQDLYMy2WHuZg4bheHOc97Remc="
+    },
+    {
+      "iseol": false,
+      "version": "5.15.95",
+      "moniker": "longterm",
+      "source": "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.95.tar.xz",
+      "changelog": "https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.15.95",
+      "hash": "sha256-6nHR8NKIA2ed/cInj9nxRfEstWanllAhgtcZMSdWRBs="
+    },
+    {
+      "iseol": false,
+      "version": "5.10.169",
+      "moniker": "longterm",
+      "source": "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.10.169.tar.xz",
+      "changelog": "https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.10.169",
+      "hash": "sha256-2XVPbrVeiCFMeqp8SDHCFfiLSNodm0D4cbBV/1brr88="
+    },
+    {
+      "iseol": false,
+      "version": "5.4.232",
+      "moniker": "longterm",
+      "source": "https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.232.tar.xz",
+      "changelog": "https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.232",
+      "hash": "sha256-sGVqXnmLLatftMnaY5jTiDBrohaYSPyDekEz6FtDDpM="
+    },
+    {
+      "iseol": false,
+      "version": "4.19.273",
+      "moniker": "longterm",
+      "source": "https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.19.273.tar.xz",
+      "changelog": "https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.19.273",
+      "hash": "sha256-Mh7yN/RmTH0Uljx1lYP1NW9vvdp5SEZIM7lNXPPVJ3M="
+    },
+    {
+      "iseol": false,
+      "version": "4.14.306",
+      "moniker": "longterm",
+      "source": "https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.14.306.tar.xz",
+      "changelog": "https://cdn.kernel.org/pub/linux/kernel/v4.x/ChangeLog-4.14.306",
+      "hash": "sha256-WLvr73oJ2+La2ATjsu+2ii20v4R3ny2n5+V+NYWL8J4="
+    },
+    {
+      "iseol": false,
+      "version": "next-20230222",
+      "moniker": "linux-next",
+      "source": "https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/snapshot/linux-next-next-20230222.tar.gz",
+      "changelog": null,
+      "hash": "sha256-0Vm84Cd+kfwHhNeENn9If1DqobBML0FxLRfB7EBB/ig="
+    }
+  ]
+}

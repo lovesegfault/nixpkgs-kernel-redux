@@ -49,7 +49,15 @@
           rnix-lsp
           statix
 
-          (python3.withPackages (p: with p; [ black mypy isort ]))
+          (python3.withPackages (p: with p; [
+            black
+            isort
+            mypy
+
+            requests
+            pgpy
+            tqdm
+          ]))
           pyright
           ruff
         ];
