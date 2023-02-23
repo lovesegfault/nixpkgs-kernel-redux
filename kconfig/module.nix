@@ -4,7 +4,7 @@ with lib;
 {
 
   options = {
-    intermediateNixConfig = mkOption {
+    autokernelConfig = mkOption {
       readOnly = true;
       type = types.lines;
     };
@@ -22,16 +22,14 @@ with lib;
   };
 
   config = {
-    intermediateNixConfig =
+    autokernelConfig =
       let
         generateKernelConfig = exprs:
           let
-            isNumber = c: elem c [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" ];
             mkConfigLine = k: v:
-              if v == null then "# CONFIG_${k} is not set\n"
-              else if v == "y" || v == "n" || v == "m" then "CONFIG_${k}=${v}\n"
-              else if all isNumber (stringToCharacters v) then "CONFIG_${k}=${v}\n"
-              else "CONFIG_${k}=\"${v}\"\n";
+              if v == null
+              then "-- ${k} is not set\n"
+              else "${k}:satisfy { \"${v}\", recursive = true }\n";
           in
           concatStrings (mapAttrsToList mkConfigLine exprs);
       in

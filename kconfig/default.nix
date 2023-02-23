@@ -2,6 +2,7 @@
 , buildPackages
 , lib
 , writeText
+, autokernel
 
   # needed for kernels >=4.16
 , bison ? null
@@ -16,22 +17,30 @@
 , src
 , patches ? [ ]
 , makeFlags ? [ ]
+
 , baseConfig ? stdenv.hostPlatform.linux-kernel.baseConfig
-, extraConfig ? { }
+, configOptions ? { }
+, extraConfigOptions ? { }
 }:
 assert (lib.versionAtLeast version "4.16") -> (bison != null && flex != null);
 assert (lib.versionAtLeast version "5.2") -> (pahole != null);
 let
+  configOptions' =
+    if configOptions == { }
+    then import ./config.nix { inherit stdenv lib version; }
+    else configOptions;
   configEval = lib.evalModules {
     modules = [
       (import ./module.nix)
-      { settings = import ./common-config.nix { inherit stdenv lib version; }; }
-      { settings = extraConfig; }
+      { settings = configOptions'; }
+      { settings = extraConfigOptions; }
     ];
   };
 
-  extraConfigFile = writeText "${pname}-extra-config-${version}"
-    configEval.config.intermediateNixConfig;
+  # FIXME: Respect baseConfig
+  autokernelConfigFile = writeText "${pname}-${version}-autokernel.lua" ''
+    load_kconfig_unchecked(kernel_dir .. "/arch/x86/configs/x86_64_defconfig")
+  '' + configEval.config.autokernelConfig;
 in
 
 stdenv.mkDerivation {
@@ -41,7 +50,7 @@ stdenv.mkDerivation {
 
   depsBuildBuild = [ buildPackages.stdenv.cc ];
 
-  nativeBuildInputs = [ ]
+  nativeBuildInputs = [ autokernel ]
     ++ lib.optionals (lib.versionAtLeast version "4.16") [ bison flex ]
     ++ lib.optionals (lib.versionAtLeast version "5.2") [ pahole ];
 
@@ -57,10 +66,10 @@ stdenv.mkDerivation {
     export HOSTLD=$LD_FOR_BUILD
 
     # first we build the base config we want to iterate on
-    make $makeFlags -C . ${baseConfig}
+    # echo "${baseConfig}"
+    # make $makeFlags -C . ${baseConfig}
 
-    # then we merge that with our extraConfig
-    ./scripts/kconfig/merge_config.sh .config ${extraConfigFile}
+    autokernel --kernel-dir "." --config "${autokernelConfigFile}" generate-config
 
     runHook postBuild
   '';
@@ -71,46 +80,7 @@ stdenv.mkDerivation {
     runHook postInstall
   '';
 
-  doInstallCheck = true;
-
-  installCheckPhase = ''
-    runHook preInstallCheck
-    declare -A knownOptions
-
-    configuredOptions="${placeholder "out"}"
-    providedOptions="${extraConfigFile}"
-
-    while read -r line; do
-        if [[ "$line" =~ ^([A-Z0-9_]+)=(.+)$ ]]; then
-            k=''${BASH_REMATCH[1]}
-            v=''${BASH_REMATCH[2]}
-            knownOptions[$k]=$v
-        fi
-    done < "$configuredOptions"
-
-
-    rc=0
-    while read -r line; do
-        if [[ "$line" =~ ^([A-Z0-9_]+)=(.+)$ ]]; then
-            k=''${BASH_REMATCH[1]}
-            v=''${BASH_REMATCH[2]}
-            if ! [ "''${knownOptions[$k]+abc}" ]; then
-                if [ "$v" != "n" ]; then
-                  printf "option '$k' was not set in the configfile (wanted '$v')\n" >&2
-                  rc=1
-                fi
-            elif [[ "''${knownOptions[$k]}" != "$v" ]]; then
-                printf "option '$k' was set to '$v' but the build configured it to ''${knownOptions[$k]}\n" >&2
-                rc=1
-            fi
-        fi
-    done < "$providedOptions"
-
-    # [[ $rc == 0 ]] || exit $rc
-    runHook postInstallCheck
-  '';
-
   dontFixup = true;
 
-  passthru = { inherit baseConfig extraConfig extraConfigFile; };
+  passthru = { inherit baseConfig configOptions extraConfigOptions autokernelConfigFile; };
 }

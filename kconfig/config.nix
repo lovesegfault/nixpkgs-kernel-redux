@@ -18,11 +18,14 @@
 }:
 
 with lib;
-with lib.kernel;
 with (lib.kernel.whenHelpers version);
 
 let
-
+  # TODO: Remove these and just use string everywhere
+  yes = "y";
+  no = "n";
+  module = "m";
+  option = x: x;
 
   # configuration items have to be part of a subattrs
   flattenKConf = nested: mapAttrs (_: head) (zipAttrs (attrValues nested));
@@ -402,7 +405,7 @@ let
     };
 
     usb = {
-      USB_DEBUG = { optional = true; tristate = whenOlder "4.18" "n"; };
+      USB_DEBUG = whenOlder "4.18" no;
       USB_EHCI_ROOT_HUB_TT = yes; # Root Hub Transaction Translators
       USB_EHCI_TT_NEWSCHED = yes; # Improved transaction translator scheduling
       USB_HIDDEV = yes; # USB Raw HID Devices (like monitor controls and Uninterruptable Power Supplies)
@@ -493,7 +496,7 @@ let
 
       # Native Language Support modules, needed by some filesystems
       NLS = yes;
-      NLS_DEFAULT = freeform "utf8";
+      NLS_DEFAULT = "utf8";
       NLS_UTF8 = module;
       NLS_CODEPAGE_437 = module; # VFAT default for the codepage= mount option
       NLS_ISO8859_1 = module; # VFAT default for the iocharset= mount option
@@ -515,7 +518,7 @@ let
       RANDOMIZE_BASE = option yes;
       STRICT_DEVMEM = mkDefault yes; # Filter access to /dev/mem
       IO_STRICT_DEVMEM = mkDefault yes;
-      SECURITY_SELINUX_BOOTPARAM_VALUE = whenOlder "5.1" (freeform "0"); # Disable SELinux by default
+      SECURITY_SELINUX_BOOTPARAM_VALUE = whenOlder "5.1" ("0"); # Disable SELinux by default
       # Prevent processes from ptracing non-children processes
       SECURITY_YAMA = option yes;
       # The goal of Landlock is to enable to restrict ambient rights (e.g. global filesystem access) for a set of processes.
@@ -543,7 +546,7 @@ let
     } // optionalAttrs (!stdenv.hostPlatform.isAarch32) {
 
       # Detect buffer overflows on the stack
-      CC_STACKPROTECTOR_REGULAR = { optional = true; tristate = whenOlder "4.18" "y"; };
+      CC_STACKPROTECTOR_REGULAR = whenOlder "4.18" yes;
     } // optionalAttrs stdenv.hostPlatform.isx86_64 {
       # Enable Intel SGX
       X86_SGX = whenAtLeast "5.11" yes;
@@ -630,7 +633,7 @@ let
       KSM = yes;
       VIRT_DRIVERS = yes;
       # We need 64 GB (PAE) support for Xen guest support
-      HIGHMEM64G = { optional = true; tristate = mkIf (!stdenv.is64bit) "y"; };
+      HIGHMEM64G = mkIf (!stdenv.is64bit) yes;
 
       VFIO_PCI_VGA = mkIf stdenv.is64bit yes;
 
@@ -737,8 +740,8 @@ let
       CRYPTO_TEST = option no;
       EFI_TEST = option no;
       GLOB_SELFTEST = option no;
-      DRM_DEBUG_MM_SELFTEST = { optional = true; tristate = whenOlder "4.18" "n"; };
-      LNET_SELFTEST = { optional = true; tristate = whenOlder "4.18" "n"; };
+      DRM_DEBUG_MM_SELFTEST = whenOlder "4.18" no;
+      LNET_SELFTEST = whenOlder "4.18" no;
       LOCK_TORTURE_TEST = option no;
       MTD_TESTS = option no;
       NOTIFIER_ERROR_INJECTION = option no;
@@ -872,8 +875,8 @@ let
         IDLE_PAGE_TRACKING = yes;
         IRDA_ULTRA = whenOlder "4.17" yes; # Ultra (connectionless) protocol
 
-        JOYSTICK_IFORCE_232 = { optional = true; tristate = whenOlder "5.3" "y"; }; # I-Force Serial joysticks and wheels
-        JOYSTICK_IFORCE_USB = { optional = true; tristate = whenOlder "5.3" "y"; }; # I-Force USB joysticks and wheels
+        JOYSTICK_IFORCE_232 = whenOlder "5.3" yes; # I-Force Serial joysticks and wheels
+        JOYSTICK_IFORCE_USB = whenOlder "5.3" yes; # I-Force USB joysticks and wheels
         JOYSTICK_XPAD_FF = option yes; # X-Box gamepad rumble support
         JOYSTICK_XPAD_LEDS = option yes; # LED Support for Xbox360 controller 'BigX' LED
 
@@ -909,7 +912,7 @@ let
         # Needs to be built-in to for integrated keyboards to function properly
         PINCTRL_CHERRYVIEW = yes;
         # 8 is default. Modern gpt tables on eMMC may go far beyond 8.
-        MMC_BLOCK_MINORS = freeform "32";
+        MMC_BLOCK_MINORS = "32";
 
         REGULATOR = yes; # Voltage and Current Regulator Support
         RC_DEVICES = option yes; # Enable IR devices
@@ -974,11 +977,11 @@ let
 
         FSL_MC_UAPI_SUPPORT = mkIf (stdenv.hostPlatform.system == "aarch64-linux") (whenAtLeast "5.12" yes);
 
-        ASHMEM = { optional = true; tristate = whenBetween "5.0" "5.18" "y"; };
-        ANDROID = { optional = true; tristate = whenAtLeast "5.0" "y"; };
-        ANDROID_BINDER_IPC = { optional = true; tristate = whenAtLeast "5.0" "y"; };
-        ANDROID_BINDERFS = { optional = true; tristate = whenAtLeast "5.0" "y"; };
-        ANDROID_BINDER_DEVICES = { optional = true; freeform = whenAtLeast "5.0" "binder,hwbinder,vndbinder"; };
+        ASHMEM = whenBetween "5.0" "5.18" yes;
+        ANDROID = whenAtLeast "5.0" yes;
+        ANDROID_BINDER_IPC = whenAtLeast "5.0" yes;
+        ANDROID_BINDERFS = whenAtLeast "5.0" yes;
+        ANDROID_BINDER_DEVICES = whenAtLeast "5.0" "binder,hwbinder,vndbinder";
 
         TASKSTATS = yes;
         TASK_DELAY_ACCT = yes;
@@ -1000,7 +1003,7 @@ let
 
         # Bump the maximum number of CPUs to support systems like EC2 x1.*
         # instances and Xeon Phi.
-        NR_CPUS = freeform "384";
+        NR_CPUS = "384";
       } // optionalAttrs (stdenv.hostPlatform.system == "armv7l-linux" || stdenv.hostPlatform.system == "aarch64-linux") {
         # Enables support for the Allwinner Display Engine 2.0
         SUN8I_DE2_CCU = yes;
@@ -1012,7 +1015,7 @@ let
         # We previously defined it on the kernel command line as cma=
         # The kernel command line will override a platform-specific configuration from its device tree.
         # https://github.com/torvalds/linux/blob/856deb866d16e29bd65952e0289066f6078af773/kernel/dma/contiguous.c#L35-L44
-        CMA_SIZE_MBYTES = freeform "32";
+        CMA_SIZE_MBYTES = "32";
 
         # Many ARM SBCs hand off a pre-configured framebuffer.
         # This always can can be replaced by the actual native driver.
