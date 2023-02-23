@@ -1,6 +1,6 @@
-{ lib, buildLinuxKernel }:
+{ lib, configureLinuxKernel, fetchurl }:
 let
-  releases = builtins.fromJson (builtins.readFile ./releases.json);
+  releases = builtins.fromJSON (builtins.readFile ./releases.json);
   kernels = map
     (relInfo:
       let
