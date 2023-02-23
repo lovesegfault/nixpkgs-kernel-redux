@@ -13,10 +13,16 @@ let
           else if relInfo.moniker == "mainline" then "linux-testing"
           else "linux_${major}_${minor}";
 
-        bar = "";
-        baz = "";
+        build = configureLinuxKernel {
+          pname = "linux";
+          inherit version;
+
+          src = fetchurl {
+            inherit (relInfo) src hash;
+          };
+        };
       in
-      { name = ""; value = ""; })
+      { inherit name; value = build; })
     releases.releases;
 in
-{ }
+lib.listToAttrs kernels

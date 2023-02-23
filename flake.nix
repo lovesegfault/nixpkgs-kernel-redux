@@ -17,7 +17,7 @@
     overlays.default = final: _: {
       autokernel = final.callPackage ./kconfig/autokernel.nix { };
       configureLinuxKernel = final.callPackage ./kconfig/default.nix { };
-
+      linuxKernelRedux.kernels = final.callPackage ./kernels/default.nix { };
     };
   } // flake-utils.lib.eachDefaultSystem (system:
     let
@@ -70,6 +70,6 @@
 
       packages = {
         inherit (pkgs) autokernel;
-      };
+      } // pkgs.linuxKernelRedux.kernels;
     });
 }
