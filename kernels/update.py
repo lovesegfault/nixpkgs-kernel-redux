@@ -21,7 +21,7 @@ def fetch_releases() -> dict:
     logging.info("Fetched kernel releases")
     # remove fields we don't care about
     for release in parsed["releases"]:
-        release["src"] = release.pop("source", None)
+        release["url"] = release.pop("source", None)
         release.pop("diffview", None)
         release.pop("gitweb", None)
         release.pop("patch", None)
@@ -61,7 +61,7 @@ release_shasums = dict()
 
 def fetch_shasums(release: Dict[str, Any]) -> str:
     global release_shasums
-    source_url = urlsplit(release["src"])
+    source_url = urlsplit(release["url"])
     source_path = Path(source_url.path)
     source_name = source_path.name
     shasums_url = source_url._replace(path=str(source_path.with_name("sha256sums.asc")))
@@ -80,7 +80,7 @@ def fetch_shasums(release: Dict[str, Any]) -> str:
 
 def get_source_hashes(releases: dict) -> None:
     for release in releases["releases"]:
-        source = release["src"]
+        source = release["url"]
         if source is None:
             if release["moniker"] != "linux-next":
                 raise Exception(
@@ -89,7 +89,7 @@ def get_source_hashes(releases: dict) -> None:
             fetch_linux_next(release)
             continue
 
-        source_url = urlsplit(release["src"])
+        source_url = urlsplit(release["url"])
         source_path = Path(source_url.path)
         source_name = source_path.name
 
@@ -137,7 +137,7 @@ def fetch_linux_next(release: Dict[str, Any]):
                 bar.update(chunk_size)
 
     source_hash = format_sri("sha256", hash.hexdigest())
-    release["src"] = source
+    release["url"] = source
     release["hash"] = source_hash
     logging.info(f"{source_name}: {source_hash}")
 

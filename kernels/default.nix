@@ -18,7 +18,7 @@ let
           inherit version;
 
           src = fetchurl {
-            inherit (relInfo) src hash;
+            inherit (relInfo) url hash;
           };
         };
       in
