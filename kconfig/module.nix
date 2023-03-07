@@ -26,10 +26,21 @@ with lib;
       let
         generateKernelConfig = exprs:
           let
+            isNumber = c: elem c [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" ];
+
+            normalizeConfigKey = k:
+              if isNumber (head (stringToCharacters k))
+              then "CONFIG_${k}"
+              else k;
+
             mkConfigLine = k: v:
-              if v == null
-              then "-- ${k} is not set\n"
-              else "${k}:satisfy { \"${v}\", recursive = true }\n";
+              let
+                k' = normalizeConfigKey k;
+              in
+              if v == "y" then "${k'}:satisfy { y, recursive = true }\n"
+              else if v == "m" then "${k'}:satisfy { m, recursive = true }\n"
+              else if v == "n" then "${k'}:set(n)\n"
+              else "${k'}:set(\"${v}\")";
           in
           concatStrings (mapAttrsToList mkConfigLine exprs);
       in

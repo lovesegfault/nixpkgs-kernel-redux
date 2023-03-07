@@ -46,29 +46,30 @@ let
         (whenBetween "5.2" "5.18" yes)
       ];
       DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT = whenAtLeast "5.18" yes;
-      # Reduced debug info conflict with BTF and have been enabled in
-      # aarch64 defconfig since 5.13
-      DEBUG_INFO_REDUCED = whenAtLeast "5.13" (option no);
-      DEBUG_INFO_BTF = whenAtLeast "5.2" (option yes);
-      # Allow loading modules with mismatched BTFs
-      # FIXME: figure out how to actually make BTFs reproducible instead
-      # See https://github.com/NixOS/nixpkgs/pull/181456 for details.
-      MODULE_ALLOW_BTF_MISMATCH = whenAtLeast "5.18" (option yes);
-      BPF_LSM = whenAtLeast "5.7" (option yes);
-      DEBUG_KERNEL = yes;
-      DEBUG_DEVRES = no;
-      DYNAMIC_DEBUG = yes;
-      DEBUG_STACK_USAGE = no;
-      RCU_TORTURE_TEST = no;
-      SCHEDSTATS = no;
-      DETECT_HUNG_TASK = yes;
-      CRASH_DUMP = option no;
-      # Easier debugging of NFS issues.
-      SUNRPC_DEBUG = yes;
-      # Provide access to tunables like sched_migration_cost_ns
-      SCHED_DEBUG = yes;
+      # # Reduced debug info conflict with BTF and have been enabled in
+      # # aarch64 defconfig since 5.13
+      # DEBUG_INFO_REDUCED = whenAtLeast "5.13" (option no);
+      # DEBUG_INFO_BTF = whenAtLeast "5.2" (option yes);
+      # # Allow loading modules with mismatched BTFs
+      # # FIXME: figure out how to actually make BTFs reproducible instead
+      # # See https://github.com/NixOS/nixpkgs/pull/181456 for details.
+      # MODULE_ALLOW_BTF_MISMATCH = whenAtLeast "5.18" (option yes);
+      # BPF_LSM = whenAtLeast "5.7" (option yes);
+      # DEBUG_KERNEL = yes;
+      # DEBUG_DEVRES = no;
+      # DYNAMIC_DEBUG = yes;
+      # DEBUG_STACK_USAGE = no;
+      # RCU_TORTURE_TEST = no;
+      # SCHEDSTATS = no;
+      # DETECT_HUNG_TASK = yes;
+      # CRASH_DUMP = option no;
+      # # Easier debugging of NFS issues.
+      # SUNRPC_DEBUG = yes;
+      # # Provide access to tunables like sched_migration_cost_ns
+      # SCHED_DEBUG = yes;
     };
 
+    /*
     power-management = {
       CPU_FREQ_DEFAULT_GOV_PERFORMANCE = yes;
       CPU_FREQ_GOV_SCHEDUTIL = yes;
@@ -978,7 +979,7 @@ let
         FSL_MC_UAPI_SUPPORT = mkIf (stdenv.hostPlatform.system == "aarch64-linux") (whenAtLeast "5.12" yes);
 
         ASHMEM = whenBetween "5.0" "5.18" yes;
-        ANDROID = whenAtLeast "5.0" yes;
+        ANDROID = whenBetween "5.0" "6.1" yes;
         ANDROID_BINDER_IPC = whenAtLeast "5.0" yes;
         ANDROID_BINDERFS = whenAtLeast "5.0" yes;
         ANDROID_BINDER_DEVICES = whenAtLeast "5.0" "binder,hwbinder,vndbinder";
@@ -1039,6 +1040,7 @@ let
         CHROMEOS_LAPTOP = module;
         CHROMEOS_PSTORE = module;
       };
+      */
   };
 in
 flattenKConf options

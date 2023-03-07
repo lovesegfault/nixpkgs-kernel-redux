@@ -2,7 +2,9 @@
 , buildPackages
 , lib
 , writeText
+
 , autokernel
+, python3
 
   # needed for kernels >=4.16
 , bison ? null
@@ -38,9 +40,14 @@ let
   };
 
   # FIXME: Respect baseConfig
-  autokernelConfigFile = writeText "${pname}-${version}-autokernel.lua" ''
+  autokernelScript = writeText "${pname}-${version}-autokernel.lua" (''
     load_kconfig_unchecked(kernel_dir .. "/arch/x86/configs/x86_64_defconfig")
-  '' + configEval.config.autokernelConfig;
+  '' + configEval.config.autokernelConfig);
+
+  autokernelConfig = writeText "${pname}-${version}-autokernel.toml" ''
+    [config]
+    script = "${autokernelScript}"
+  '';
 in
 
 stdenv.mkDerivation {
@@ -50,7 +57,7 @@ stdenv.mkDerivation {
 
   depsBuildBuild = [ buildPackages.stdenv.cc ];
 
-  nativeBuildInputs = [ autokernel ]
+  nativeBuildInputs = [ autokernel python3 ]
     ++ lib.optionals (lib.versionAtLeast version "4.16") [ bison flex ]
     ++ lib.optionals (lib.versionAtLeast version "5.2") [ pahole ];
 
@@ -65,11 +72,8 @@ stdenv.mkDerivation {
     export HOSTAR=$AR_FOR_BUILD
     export HOSTLD=$LD_FOR_BUILD
 
-    # first we build the base config we want to iterate on
-    # echo "${baseConfig}"
-    # make $makeFlags -C . ${baseConfig}
-
-    autokernel --kernel-dir "." --config "${autokernelConfigFile}" generate-config
+    export RUST_BACKTRACE=1
+    autokernel --kernel-dir "." --config "${autokernelConfig}" generate-config
 
     runHook postBuild
   '';
@@ -82,5 +86,5 @@ stdenv.mkDerivation {
 
   dontFixup = true;
 
-  passthru = { inherit baseConfig configOptions extraConfigOptions autokernelConfigFile; };
+  passthru = { inherit baseConfig configOptions extraConfigOptions autokernelScript; };
 }

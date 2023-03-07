@@ -22,24 +22,22 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "autokernel";
-  version = "unstable-2023-03-03";
+  version = "unstable-2023-03-07";
 
   src = fetchFromGitHub {
     owner = "oddlama";
     repo = pname;
-    rev = "ce3b4e29462c59376f7fa90742a18186ee15bcec";
-    hash = "sha256-rfWVGd+NhkJiYvZOqKhKnBVlupyL/KwivSH7ovy5lkc=";
+    rev = "e50c6b1eb4732ef48f8f748bee5292b67d6ac799";
+    hash = "sha256-JyT+w93ONa/79vQ4uG57MbVrfkgcoC2dnga5cLehzS4=";
   };
 
-  cargoHash = "sha256-mPJZ3mvts0+aOM0p3E4eUcsgoHseugWwEZI/rmznWJA=";
+  cargoHash = "sha256-GG9HHYrxJYeKAwj0ZVZ/J47lQS0XpV3R4sQna3IQi0I=";
 
   propagatedBuildInputs = [ bash ];
 
   postPatch = ''
     chmod +x src/bridge/cbridge/interceptor.sh
     patchShebangs --host src/bridge/cbridge/interceptor.sh
-    substituteInPlace src/bridge/cbridge/interceptor.sh \
-      --replace "exec /bin/bash" 'exec "$BASH"'
   '';
 
   doCheck = stdenv.hostPlatform == stdenv.buildPlatform;
