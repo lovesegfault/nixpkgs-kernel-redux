@@ -2,7 +2,9 @@
 , fetchFromGitHub
 , fetchurl
 , rustPlatform
+, bash
 
+, stdenv
 , bison
 , flex
 , gcc
@@ -20,31 +22,38 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "autokernel";
-  version = "2.0.1";
+  version = "unstable-2023-03-03";
 
   src = fetchFromGitHub {
     owner = "oddlama";
     repo = pname;
-    rev = "v${version}";
-    hash = "sha256-upiENXRYVSZMPLcb9DeUx0FR97rMbW/sEAlYKi9dvI4=";
+    rev = "ce3b4e29462c59376f7fa90742a18186ee15bcec";
+    hash = "sha256-rfWVGd+NhkJiYvZOqKhKnBVlupyL/KwivSH7ovy5lkc=";
   };
 
-  cargoHash = "sha256-yE9vIcy4OJrGyQPWnUAIyliiVsNews/CZfxwTmudXyU=";
+  cargoHash = "sha256-mPJZ3mvts0+aOM0p3E4eUcsgoHseugWwEZI/rmznWJA=";
 
-  # XXX: These are very tricky to run, so we don't
-  # TODO: Get tests to work
-  doCheck = false;
-  # nativeCheckInputs = [
-  #   bison
-  #   flex
-  #   gcc
-  #   python3
-  # ];
-  # preCheck = ''
-  #   test_dir="$TMPDIR/autokernel-test"
-  #   mkdir -p "$test_dir"
-  #   ln -s "${kernelTestArchive}" "$test_dir/linux-${kernelTestVersion}.tar.xz"
-  # '';
+  propagatedBuildInputs = [ bash ];
+
+  postPatch = ''
+    chmod +x src/bridge/cbridge/interceptor.sh
+    patchShebangs --host src/bridge/cbridge/interceptor.sh
+    substituteInPlace src/bridge/cbridge/interceptor.sh \
+      --replace "exec /bin/bash" 'exec "$BASH"'
+  '';
+
+  doCheck = stdenv.hostPlatform == stdenv.buildPlatform;
+  nativeCheckInputs = [
+    bison
+    flex
+    gcc
+    python3
+  ];
+  preCheck = ''
+    test_dir="$TMPDIR/autokernel-test"
+    mkdir -p "$test_dir"
+    ln -s "${kernelTestArchive}" "$test_dir/linux-${kernelTestVersion}.tar.xz"
+  '';
 
   meta = with lib; { };
 }
