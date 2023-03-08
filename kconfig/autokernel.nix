@@ -22,16 +22,16 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "autokernel";
-  version = "unstable-2023-03-07";
+  version = "unstable-2023-03-08";
 
   src = fetchFromGitHub {
     owner = "oddlama";
     repo = pname;
-    rev = "e50c6b1eb4732ef48f8f748bee5292b67d6ac799";
-    hash = "sha256-JyT+w93ONa/79vQ4uG57MbVrfkgcoC2dnga5cLehzS4=";
+    rev = "0e62fa7fd935309f0fc344982e9ed12314bb974f";
+    hash = "sha256-t0in7JRP8QB3kVR2ALkhXLtj54m3layvk/Yr7cA5aEU=";
   };
 
-  cargoHash = "sha256-GG9HHYrxJYeKAwj0ZVZ/J47lQS0XpV3R4sQna3IQi0I=";
+  cargoHash = "sha256-W0r9obdKn71F2BK1EJJUwESX22TMpFdRrUYl9w21HoI=";
 
   propagatedBuildInputs = [ bash ];
 
